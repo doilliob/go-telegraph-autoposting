@@ -11,7 +11,6 @@ import (
 const (
 	contentDirectoryPattern = `\d\d\d\d-\d\d-\d\d - (.*)`
 	todayFormat             = "2006-01-02"
-	imagesFolderName        = "images"
 )
 
 var (
@@ -65,36 +64,28 @@ func FilterFilesList(files []os.FileInfo, filterPredicate FilterPredicate) []os.
 }
 
 // Read directory content and filter files list by predicate
-func readDirAndFilter(path string, filterPredicate FilterPredicate) []os.FileInfo {
+func getFolderContent(folderPath string, filterPredicate FilterPredicate) []os.FileInfo {
 	// Read directory
-	files, err := ioutil.ReadDir(path)
+	files, err := ioutil.ReadDir(folderPath)
 	checkError(err)
 	// Filter by predicate
 	return FilterFilesList(files, filterPredicate)
 }
 
 // Read title from folder name and images from 'images' subfolder and generate task
-func generateTaskFromFolder(path string) Task {
-	imagesFolder := path + "/" + imagesFolderName
-
+func generateTaskFromFolder(folderPath string) Task {
 	// Get title from folder name
-	titles := reIsContentDirectory.FindStringSubmatch(path)
+	titles := reIsContentDirectory.FindStringSubmatch(folderPath)
 	if len(titles) < 2 {
-		logger.Panic("Title is not found for folder " + path)
+		logger.Panic("Title is not found for folder " + folderPath)
 	}
 	title := titles[1]
 
-	// Find folder with images
-	_, err := os.Stat(imagesFolder)
-	if err != nil {
-		logger.Panic("Subfolder 'images' not found in folder " + path)
-	}
-
 	// Find all image files in image folder
-	imagesList := readDirAndFilter(imagesFolder, FilterImageFiles())
+	imagesList := getFolderContent(folderPath, FilterImageFiles())
 	var imagesFullNamesList []string
 	for _, fileName := range FilterFilesNames(imagesList) {
-		imagesFullNamesList = append(imagesFullNamesList, imagesFolder+"/"+fileName)
+		imagesFullNamesList = append(imagesFullNamesList, folderPath+"/"+fileName)
 	}
 
 	// Generate task for processing folder

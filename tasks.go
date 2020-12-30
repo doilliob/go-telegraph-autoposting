@@ -30,9 +30,6 @@ func executeTask(client *telegraph.Client, t Task) {
 	logger.Trace("")
 	logger.Trace("Uploading images...")
 	urls := uploadImages(client, resizedImages)
-	for _, url := range urls {
-		logger.Trace(" -> " + Url(url))
-	}
 
 	logger.Trace("")
 	logger.Trace("Public page...")

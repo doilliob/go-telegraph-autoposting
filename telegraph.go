@@ -16,9 +16,15 @@ func getTelegraphConnection(acountName string) (*telegraph.Client, *telegraph.Ac
 }
 
 func uploadImages(client *telegraph.Client, images []string) []string {
-	paths, err := client.Upload(images)
-	checkError(err)
-	return paths
+	var urls []string
+	for _, imageName := range images {
+		logger.Trace("Uploading: " + imageName)
+		imageURL, err := client.Upload([]string{imageName})
+		checkError(err)
+		logger.Trace("Image URL: " + imageURL[0])
+		urls = append(urls, imageURL[0])
+	}
+	return urls
 }
 
 func publicPage(client *telegraph.Client, title string, imagesURLs []string) string {

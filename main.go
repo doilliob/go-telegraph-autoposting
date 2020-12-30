@@ -19,25 +19,27 @@ func main() {
 	defer logger.Destroy()
 
 	// Read configuration
-	logger.Info("Read YAML configuration:")
 	configuration = readConfigurationFile(ConfigurationFileName)
+	// Logging
+	logger.Info("Read YAML configuration:")
 	logger.Info(" -- Account name: " + configuration.TelegraphAcountName)
 	logger.Info(fmt.Sprintf(" -- Max image size (MB): %d", configuration.MaxImageSizeMb))
 	logger.Info(fmt.Sprintf(" -- Debug mode: %t", configuration.Debug))
 
 	// Get today folders
-	currentDirList := readDirAndFilter(".", FilterOnlyFoldersWithContent())
-	todayDirList := FilterFilesNames(
-		FilterFilesList(currentDirList, FilterOnlyTodayFolders()))
+	currentDirList := getFolderContent(".", FilterOnlyFoldersWithContent())
+	todayDirList := FilterFilesList(currentDirList, FilterOnlyTodayFolders())
+	todayDirNames := FilterFilesNames(todayDirList)
+
 	logger.Info("")
-	logger.Info(fmt.Sprintf("Found %d today folders:", len(todayDirList)))
-	for _, folder := range todayDirList {
+	logger.Info(fmt.Sprintf("Found %d today folders:", len(todayDirNames)))
+	for _, folder := range todayDirNames {
 		logger.Info(" -> " + folder)
 	}
 
 	// Generating tasks for each folder
 	var tasks []Task
-	for _, folder := range todayDirList {
+	for _, folder := range todayDirNames {
 		tasks = append(tasks, generateTaskFromFolder(folder))
 	}
 
